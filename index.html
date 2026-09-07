@@ -419,6 +419,32 @@
         to { transform: rotate(360deg); }
     }
 </style>
+
+<h1 id="title"></h1>
+<button id="button"></button>
+
+<script>
+const translations = {
+    ru: {
+        title: "Добро пожаловать",
+        button: "Продолжить"
+    },
+    en: {
+        title: "Welcome",
+        button: "Continue"
+    },
+    pl: {
+        title: "Witamy",
+        button: "Kontynuuj"
+    }
+};
+
+const language = navigator.language.split("-")[0];
+const lang = translations[language] ? language : "en";
+
+document.getElementById("title").textContent = translations[lang].title;
+document.getElementById("button").textContent = translations[lang].button;
+</script>
   <script>
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect = document.getElementById('yearSelect');
