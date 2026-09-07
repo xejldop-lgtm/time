@@ -385,40 +385,6 @@
       </div>
     </div>
   </div>
-<style>
-    /* Индикатор обновления */
-    #ptr-indicator {
-        position: fixed;
-        top: -50px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40px;
-        height: 40px;
-        background: #ffffff;
-        border-radius: 50%;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: top 0.1s ease, transform 0.2s ease;
-        z-index: 9999;
-    }
-    /* Иконка стрелочки внутри */
-    #ptr-indicator svg {
-        width: 20px;
-        height: 20px;
-        fill: #007bff;
-        transition: transform 0.2s;
-    }
-    /* Класс для анимации вращения во время обновления */
-    .ptr-loading svg {
-        animation: ptr-spin 0.8s linear infinite;
-    }
-    @keyframes ptr-spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-</style>
 
 <h1 id="title"></h1>
 <button id="button"></button>
@@ -444,6 +410,20 @@ const lang = translations[language] ? language : "en";
 
 document.getElementById("title").textContent = translations[lang].title;
 document.getElementById("button").textContent = translations[lang].button;
+</script>
+
+<script>
+    const language = navigator.language;
+
+    if (language.startsWith("ru")) {
+        document.body.innerHTML = "Привет!";
+    } else if (language.startsWith("en")) {
+        document.body.innerHTML = "Hello!";
+    } else if (language.startsWith("pl")) {
+        document.body.innerHTML = "Cześć!";
+    } else {
+        document.body.innerHTML = "Hello!";
+    }
 </script>
   <script>
     const monthSelect = document.getElementById('monthSelect');
