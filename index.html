@@ -369,22 +369,26 @@
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('sw.js')
                 .then((reg) => {
-                    console.log('Service Worker зарегистрирован!');
+                    console.log('Service Worker готов');
                     
-                    // Если код обновился на сервере, сервис-воркер проверит это в фоне
+                    // Принудительно проверяем обновление на сервере при каждом открытии
+                    if (navigator.onLine) {
+                        reg.update(); 
+                    }
+
                     reg.addEventListener('updatefound', () => {
                         const newWorker = reg.installing;
                         newWorker.addEventListener('statechange', () => {
-                            // Как только новый код скачался и активировался
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                console.log('Доступно обновление! Перезагрузка...');
-                                // Перезагружаем страницу, чтобы пользователь сразу увидел изменения
+                                // Если найден новый код, очищаем кэш браузера и перезагружаем
+                                caches.keys().then(names => {
+                                    for (let name of names) caches.delete(name);
+                                });
                                 window.location.reload();
                             }
                         });
                     });
-                })
-                .catch(err => console.error('Ошибка:', err));
+                });
         }
     </script>
   
