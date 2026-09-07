@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <link rel="manifest" href="manifest.json">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+  />
+
+  <title>Рабочие часы</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #20222494;
+      --card: #050505;
+      --text: #255b99;
+      --muted: #6f00ff;
+      --border: #e5e9ed;
+      --accent: #2563eb;
+      --accent-light: #ff0000;
+      --success: #16a34a;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Helvetica,
+        Arial,
+        sans-serif;
+      min-height: 100vh;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      padding-bottom: 130px;
+    }
+
+    header {
+      background: var(--card);
+      padding: 20px 16px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: 25px;
+      line-height: 1.2;
+      font-weight: 750;
+    }
+
+    .controls {
+      display: grid;
+      gap: 12px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      border-radius: 12px;
+      font-size: 18px;
+      padding: 13px 14px;
+      min-height: 50px;
+      outline: none;
+      appearance: none;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+
+    .month-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .rate-wrapper {
+      position: relative;
+    }
+
+    .rate-wrapper input {
+      padding-right: 55px;
+    }
+
+    .currency {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    main {
+      padding: 14px 12px;
+    }
+
+    .days-header {
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      padding: 0 10px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .days {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .day {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 13px;
+      min-height: 66px;
+      display: grid;
+      grid-template-columns: 1fr 120px;
+      align-items: center;
+      padding: 8px 10px;
+      transition: 0.15s ease;
+    }
+
+    .day.today {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+
+    .day-info {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .day-number {
+      width: 42px;
+      height: 42px;
+      min-width: 42px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f3f5;
+      font-size: 16px;
+      font-weight: 750;
+      margin-right: 10px;
+    }
+
+    .today .day-number {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .day-text {
+      min-width: 0;
+    }
+
+    .weekday {
+      font-size: 15px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .date {
+      margin-top: 2px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .hours-input {
+      text-align: center;
+      font-size: 19px;
+      font-weight: 650;
+      padding: 9px 7px;
+      min-height: 48px;
+    }
+
+    .hours-input::placeholder {
+      color: #b7bec6;
+      font-weight: 400;
+    }
+
+    .weekend .weekday {
+      color: #5eff00;
+    }
+
+    .summary {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-top: 1px solid var(--border);
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    }
+
+    .summary-inner {
+      max-width: 600px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .summary-card {
+      background: #f7f8fa;
+      border-radius: 12px;
+      padding: 10px 12px;
+      min-width: 0;
+    }
+
+    .summary-label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 650;
+      margin-bottom: 3px;
+    }
+
+    .summary-value {
+      font-size: 20px;
+      line-height: 1.2;
+      font-weight: 800;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .earnings {
+      color: var(--success);
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px 15px;
+      color: var(--muted);
+    }
+
+    @media (min-width: 500px) {
+      header {
+        margin-top: 15px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+
+      .app {
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .summary {
+        background: transparent;
+        border: 0;
+      }
+
+      .summary-inner {
+        background: rgba(255, 255, 255, 0.96);
+        padding: 8px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+
+    <header>
+      <h1>Рабочие часы</h1>
+
+      <div class="controls">
+
+        <div class="field">
+          <label>Месяц</label>
+
+          <div class="month-row">
+            <select id="monthSelect" aria-label="Месяц"></select>
+            <select id="yearSelect" aria-label="Год"></select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="rateInput">Часовая ставка</label>
+
+          <div class="rate-wrapper">
+            <input
+              id="rateInput"
+              type="number"
+              inputmode="decimal"
+              min="0"
+              step="0.01"
+              placeholder="Например, 15"
+              autocomplete="off"
+            />
+            <span class="currency">/ Zl-Час</span>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <main>
+      <div class="days-header">
+        <span>День</span>
+        <span style="text-align:center;">Часы</span>
+      </div>
+
+      <div id="daysList" class="days"></div>
+    </main>
+  </div>
+
+  <div class="summary">
+    <div class="summary-inner">
+
+      <div class="summary-card">
+        <div class="summary-label">ВСЕГО ЧАСОВ</div>
+        <div id="totalHours" class="summary-value">0 ч</div>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-label">ЗАРАБОТОК</div>
+        <div id="totalEarnings" class="summary-value earnings">0</div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "workHoursCalculator";
+
+    const monthSelect = document.getElementById("monthSelect");
+    const yearSelect = document.getElementById("yearSelect");
+    const rateInput = document.getElementById("rateInput");
+    const daysList = document.getElementById("daysList");
+    const totalHoursElement = document.getElementById("totalHours");
+    const totalEarningsElement = document.getElementById("totalEarnings");
+
+    const monthNames = [
+      "Январь",
+      "Февраль",
+      "Март",
+      "Апрель",
+      "Май",
+      "Июнь",
+      "Июль",
+      "Август",
+      "Сентябрь",
+      "Октябрь",
+      "Ноябрь",
+      "Декабрь"
+    ];
+
+    const weekdayNames = [
+      "Воскресенье",
+      "Понедельник",
+      "Вторник",
+      "Среда",
+      "Четверг",
+      "Пятница",
+      "Суббота"
+    ];
+
+    const now = new Date();
+
+    let selectedMonth = now.getMonth();
+    let selectedYear = now.getFullYear();
+
+    // -----------------------------
+    // Работа с localStorage
+    // -----------------------------
+
+    function loadStorage() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
+      } catch (error) {
+        console.error("Ошибка чтения localStorage:", error);
+        return {};
+      }
+    }
+
+    function saveStorage(data) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      } catch (error) {
+        console.error("Ошибка сохранения в localStorage:", error);
+      }
+    }
+
+    function monthKey() {
+      return `${selectedYear}-${String(selectedMonth + 1).padStart(2, "0")}`;
+    }
+
+    function getCurrentMonthData() {
+      const data = loadStorage();
+
+      if (!data[monthKey()]) {
+        data[monthKey()] = {
+          rate: "",
+          hours: {}
+        };
+      }
+
+      return data[monthKey()];
+    }
+
+    function saveCurrentMonthData(monthData) {
+      const data = loadStorage();
+      data[monthKey()] = monthData;
+      saveStorage(data);
+    }
+
+    // -----------------------------
+    // Заполнение выбора месяца/года
+    // -----------------------------
+
+    function setupSelectors() {
+      monthNames.forEach((month, index) => {
+        const option = document.createElement("option");
+        option.value = index;
+        option.textContent = month;
+        monthSelect.appendChild(option);
+      });
+
+      // Показываем небольшой диапазон лет:
+      // текущий год ± 5 лет.
+      for (let year = now.getFullYear() - 5; year <= now.getFullYear() + 5; year++) {
+        const option = document.createElement("option");
+        option.value = year;
+        option.textContent = year;
+        yearSelect.appendChild(option);
+      }
+
+      monthSelect.value = selectedMonth;
+      yearSelect.value = selectedYear;
+    }
+
+    // -----------------------------
+    // Отрисовка дней
+    // -----------------------------
+
+    function renderDays() {
+      daysList.innerHTML = "";
+
+      const daysInMonth = new Date(
+        selectedYear,
+        selectedMonth + 1,
+        0
+      ).getDate();
+
+      const monthData = getCurrentMonthData();
+
+      rateInput.value = monthData.rate || "";
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(
+          selectedYear,
+          selectedMonth,
+          day
+        );
+
+        const weekday = date.getDay();
+
+        const dayElement = document.createElement("div");
+        dayElement.className = "day";
+
+        const isToday =
+          day === now.getDate() &&
+          selectedMonth === now.getMonth() &&
+          selectedYear === now.getFullYear();
+
+        if (isToday) {
+          dayElement.classList.add("today");
+        }
+
+        if (weekday === 0 || weekday === 6) {
+          dayElement.classList.add("weekend");
+        }
+
+        const dayInfo = document.createElement("div");
+        dayInfo.className = "day-info";
+
+        const dayNumber = document.createElement("div");
+        dayNumber.className = "day-number";
+        dayNumber.textContent = day;
+
+        const dayText = document.createElement("div");
+        dayText.className = "day-text";
+
+        const weekdayElement = document.createElement("div");
+        weekdayElement.className = "weekday";
+        weekdayElement.textContent = weekdayNames[weekday];
+
+        const dateElement = document.createElement("div");
+        dateElement.className = "date";
+        dateElement.textContent =
+          `${String(day).padStart(2, "0")}.${String(selectedMonth + 1).padStart(2, "0")}.${selectedYear}`;
+
+        dayText.appendChild(weekdayElement);
+        dayText.appendChild(dateElement);
+
+        dayInfo.appendChild(dayNumber);
+        dayInfo.appendChild(dayText);
+
+        const hoursInput = document.createElement("input");
+
+        hoursInput.className = "hours-input";
+        hoursInput.type = "number";
+        hoursInput.inputMode = "decimal";
+        hoursInput.min = "0";
+        hoursInput.step = "0.5";
+        hoursInput.placeholder = "0";
+        hoursInput.autocomplete = "off";
+        hoursInput.dataset.day = day;
+
+        if (monthData.hours[day] !== undefined) {
+          hoursInput.value = monthData.hours[day];
+        }
+
+        hoursInput.addEventListener("input", () => {
+          const currentData = getCurrentMonthData();
+
+          const value = hoursInput.value.trim();
+
+          if (value === "") {
+            delete currentData.hours[day];
+          } else {
+            const number = parseFloat(value);
+
+            if (!isNaN(number) && number >= 0) {
+              currentData.hours[day] = number;
+            }
+          }
+
+          saveCurrentMonthData(currentData);
+          updateSummary();
+        });
+
+        dayElement.appendChild(dayInfo);
+        dayElement.appendChild(hoursInput);
+
+        daysList.appendChild(dayElement);
+      }
+
+      updateSummary();
+    }
+    const CACHE_NAME = 'offline-v1';
+// Укажите здесь все файлы, которые нужны вашему сайту (css, js, картинки)
+const ASSETS = [
+  'index.html',
+  'manifest.json',
+  'icon.png'
+];
+
+// Установка: кешируем файлы
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
+  );
+});
+
+// Активация: чистим старый кэш
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
+      );
+    })
+  );
+});
+
+// Перехват запросов: сначала ищем в кэше, если нет — берем из сети
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      return cachedResponse || fetch(event.request);
+    })
+  );
+});
+
+
+    // -----------------------------
+    // Расчёт итогов
+    // -----------------------------
+
+    function updateSummary() {
+      const monthData = getCurrentMonthData();
+
+      let totalHours = 0;
+
+      Object.values(monthData.hours).forEach(value => {
+        const hours = parseFloat(value);
+
+        if (!isNaN(hours) && hours >= 0) {
+          totalHours += hours;
+        }
+      });
+
+      const rate = parseFloat(monthData.rate) || 0;
+      const earnings = totalHours * rate;
+
+      totalHoursElement.textContent =
+        `${formatNumber(totalHours)} ч`;
+
+      totalEarningsElement.textContent =
+        formatMoney(earnings);
+    }
+
+    function formatNumber(number) {
+      return new Intl.NumberFormat("ru-RU", {
+        maximumFractionDigits: 2
+      }).format(number);
+    }
+
+    function formatMoney(number) {
+      return new Intl.NumberFormat("ru-RU", {
+        maximumFractionDigits: 2
+      }).format(number);
+    }
+
+    // -----------------------------
+    // Изменение ставки
+    // -----------------------------
+
+    rateInput.addEventListener("input", () => {
+      const monthData = getCurrentMonthData();
+
+      monthData.rate = rateInput.value;
+
+      saveCurrentMonthData(monthData);
+      updateSummary();
+    });
+
+    // -----------------------------
+    // Изменение месяца / года
+    // -----------------------------
+
+    monthSelect.addEventListener("change", () => {
+      selectedMonth = parseInt(monthSelect.value, 10);
+      renderDays();
+    });
+
+    yearSelect.addEventListener("change", () => {
+      selectedYear = parseInt(yearSelect.value, 10);
+      renderDays();
+    });
+
+    // -----------------------------
+    // Запуск
+    // -----------------------------
+
+    setupSelectors();
+    renderDays();
+  </script>
+</body>
+</html>
