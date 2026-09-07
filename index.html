@@ -412,19 +412,7 @@ document.getElementById("title").textContent = translations[lang].title;
 document.getElementById("button").textContent = translations[lang].button;
 </script>
 
-<script>
-    const language = navigator.language;
 
-    if (language.startsWith("ru")) {
-        document.body.innerHTML = "Привет!";
-    } else if (language.startsWith("en")) {
-        document.body.innerHTML = "Hello!";
-    } else if (language.startsWith("pl")) {
-        document.body.innerHTML = "Cześć!";
-    } else {
-        document.body.innerHTML = "Hello!";
-    }
-</script>
   <script>
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect = document.getElementById('yearSelect');
