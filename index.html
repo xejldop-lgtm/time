@@ -365,6 +365,29 @@
     </div>
   </div>
 
+<script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then((reg) => {
+                    console.log('Service Worker зарегистрирован!');
+                    
+                    // Если код обновился на сервере, сервис-воркер проверит это в фоне
+                    reg.addEventListener('updatefound', () => {
+                        const newWorker = reg.installing;
+                        newWorker.addEventListener('statechange', () => {
+                            // Как только новый код скачался и активировался
+                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                console.log('Доступно обновление! Перезагрузка...');
+                                // Перезагружаем страницу, чтобы пользователь сразу увидел изменения
+                                window.location.reload();
+                            }
+                        });
+                    });
+                })
+                .catch(err => console.error('Ошибка:', err));
+        }
+    </script>
+  
   <script>
     const STORAGE_KEY = "workHoursCalculator";
 
