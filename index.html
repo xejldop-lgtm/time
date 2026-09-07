@@ -19,7 +19,7 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    :root {
+         :root {
       --bg: #4e4b4e;
       --card: #00559b;
       --text: #020202;
@@ -28,7 +28,10 @@
       --accent: #2563eb;
       --accent-light: #00559b;
       --success: #050505;
+      --currency: #ff00c8;
     }
+
+
     
 
 
@@ -88,7 +91,7 @@
     select {
       width: 100%;
       border: 1px solid var(--border);
-      background: #012997;
+      background: #aeaeb1;
       color: var(--text);
       border-radius: 12px;
       font-size: 18px;
@@ -101,7 +104,7 @@
     input:focus,
     select:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+      box-shadow: 0 0 0 3px rgba(77, 12, 151, 0.753);
     }
 
     .month-row {
@@ -181,7 +184,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #f1f3f5;
+      background: #fdfcfc;
       font-size: 16px;
       font-weight: 750;
       margin-right: 10px;
@@ -189,7 +192,7 @@
 
     .today .day-number {
       background: var(--accent);
-      color: #fff;
+      color: #050505;
     }
 
     .day-text {
@@ -217,12 +220,12 @@
     }
 
     .hours-input::placeholder {
-      color: #b7bec6;
+      color: #2b2a2a;
       font-weight: 400;
     }
 
     .weekend .weekday {
-      color: #5eff00;
+      color: #e6f701;
     }
 
     .summary {
@@ -231,7 +234,7 @@
       right: 0;
       bottom: 0;
       z-index: 10;
-      background: rgba(255, 255, 255, 0.96);
+      background: rgba(0, 0, 0, 0.96);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
       border-top: 1px solid var(--border);
@@ -336,7 +339,7 @@
               placeholder="Например, 15"
               autocomplete="off"
             />
-            <span class="currency">/ Zl-Час</span>
+            <span class="currency" style="color: #000000; font-weight: 750;">/ Zl-Час</span>
           </div>
         </div>
 
@@ -378,7 +381,7 @@
         transform: translateX(-50%);
         width: 40px;
         height: 40px;
-        background: #ffffff;
+        background: #0c0c0c;
         border-radius: 50%;
         box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         display: flex;
