@@ -16,13 +16,13 @@
     }
 
     :root {
-      --bg: #E5E9FF;
-      --card: #00559b;
+      --bg: #000000;
+      --card: #036e1a;
       --text: #020202;
-      --muted: #fcfbfd;
-      --border: #ff00c8;
-      --accent: #2563eb;
-      --accent-light: #00559b;
+      --muted: #000000;
+      --border: #92c700;
+      --accent: #b4e600;
+      --accent-light: #630d0d;
       --success: #050505;
       --currency: #ff00c8;
       --neon-green: #e6f701;
@@ -211,7 +211,7 @@
       text-align: center;
       font-weight: 700;
       border-radius: 8px !important;
-      background: #012997 !important;
+      background: rgb(3, 110, 26) !important;
       color: var(--muted) !important;
     }
 
@@ -385,34 +385,40 @@
       </div>
     </div>
   </div>
-
-<h1 id="title"></h1>
-<button id="button"></button>
-
-<script>
-const translations = {
-    ru: {
-        title: "Добро пожаловать",
-        button: "Продолжить"
-    },
-    en: {
-        title: "Welcome",
-        button: "Continue"
-    },
-    pl: {
-        title: "Witamy",
-        button: "Kontynuuj"
+<style>
+    /* Индикатор обновления */
+    #ptr-indicator {
+        position: fixed;
+        top: -50px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 40px;
+        background: #ffffff;
+        border-radius: 50%;
+        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: top 0.1s ease, transform 0.2s ease;
+        z-index: 9999;
     }
-};
-
-const language = navigator.language.split("-")[0];
-const lang = translations[language] ? language : "en";
-
-document.getElementById("title").textContent = translations[lang].title;
-document.getElementById("button").textContent = translations[lang].button;
-</script>
-
-
+    /* Иконка стрелочки внутри */
+    #ptr-indicator svg {
+        width: 20px;
+        height: 20px;
+        fill: #007bff;
+        transition: transform 0.2s;
+    }
+    /* Класс для анимации вращения во время обновления */
+    .ptr-loading svg {
+        animation: ptr-spin 0.8s linear infinite;
+    }
+    @keyframes ptr-spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
   <script>
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect = document.getElementById('yearSelect');
