@@ -195,6 +195,18 @@
       color: var(--muted);
     }
 
+    /* Подпись ставки для воскресенья внутри блока дня */
+    .day-rate-badge {
+      font-size: 11px;
+      color: var(--neon-green);
+      font-weight: 600;
+      margin-top: 1px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1px 5px;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
     .time-range-block {
       display: flex;
       flex-wrap: wrap;
@@ -311,7 +323,7 @@
         transform: translateX(-50%);
         width: 40px;
         height: 40px;
-        background: #0c0c0c;
+        background: #ffffff;
         border-radius: 50%;
         box-shadow: 0 3px 10px rgba(0,0,0,0.2);
         display: flex;
@@ -361,6 +373,13 @@
             <span class="currency" style="color: #000000; font-weight: 750;">/ Zl-Час</span>
           </div>
         </div>
+        <div class="field">
+          <label for="sundayRateInput">Ставка в воскресенье (если отличается)</label>
+          <div class="rate-wrapper">
+            <input id="sundayRateInput" type="number" inputmode="decimal" min="0" step="0.01" placeholder="По умолчанию базовая ставка" autocomplete="off" />
+            <span class="currency" style="color: #000000; font-weight: 750;">/ Zl-Час</span>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -385,44 +404,12 @@
       </div>
     </div>
   </div>
-<style>
-    /* Индикатор обновления */
-    #ptr-indicator {
-        position: fixed;
-        top: -50px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 40px;
-        height: 40px;
-        background: #ffffff;
-        border-radius: 50%;
-        box-shadow: 0 3px 10px rgba(0,0,0,0.2);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: top 0.1s ease, transform 0.2s ease;
-        z-index: 9999;
-    }
-    /* Иконка стрелочки внутри */
-    #ptr-indicator svg {
-        width: 20px;
-        height: 20px;
-        fill: #007bff;
-        transition: transform 0.2s;
-    }
-    /* Класс для анимации вращения во время обновления */
-    .ptr-loading svg {
-        animation: ptr-spin 0.8s linear infinite;
-    }
-    @keyframes ptr-spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-</style>
+
   <script>
     const monthSelect = document.getElementById('monthSelect');
     const yearSelect = document.getElementById('yearSelect');
     const rateInput = document.getElementById('rateInput');
+    const sundayRateInput = document.getElementById('sundayRateInput');
     const daysList = document.getElementById('daysList');
     const totalHoursEl = document.getElementById('totalHours');
     const totalEarningsEl = document.getElementById('totalEarnings');
@@ -446,6 +433,7 @@
     });
 
     rateInput.value = localStorage.getItem('savedRate') || '';
+    sundayRateInput.value = localStorage.getItem('savedSundayRate') || '';
 
     function renderCalendar() {
         daysList.innerHTML = '';
@@ -468,16 +456,23 @@
             const formattedDate = `${String(d).padStart(2, '0')}.${String(month + 1).padStart(2, '0')}.${year}`;
             const dayValues = savedMonthData[d] || { start: '', end: '' };
 
+            // Добавляем плашку подписи ставки для воскресений (id="rate_badge_d")
+            let badgeHtml = '';
+            if (dayOfWeek === 0) {
+                badgeHtml = `<div class="day-rate-badge" id="rate_badge_${d}"></div>`;
+            }
+
             dayRow.innerHTML = `
                 <div class="day-info">
                     <div class="day-number">${d}</div>
                     <div class="day-text">
                         <div class="weekday">${weekdays[dayOfWeek]}</div>
                         <div class="date">${formattedDate}</div>
+                        ${badgeHtml}
                     </div>
                 </div>
                 <div class="time-range-block">
-                    <input type="time" class="time-pick start-time" data-day="${d}" value="${dayValues.start}">
+                    <input type="time" class="time-pick start-time" data-day="${d}" data-weekday="${dayOfWeek}" value="${dayValues.start}">
                     <span class="time-dash">—</span>
                     <input type="time" class="time-pick end-time" data-day="${d}" value="${dayValues.end}">
                     <div class="day-calculated-hours" id="calc_text_${d}">0 ч</div>
@@ -505,13 +500,18 @@
         const storageKey = `hours_data_${year}_${month}`;
         
         let grandTotalHours = 0;
+        let grandTotalEarnings = 0;
         const monthDataToSave = {};
+
+        const baseRate = parseFloat(rateInput.value) || 0;
+        const customSundayRate = parseFloat(sundayRateInput.value) || 0;
 
         const rows = daysList.querySelectorAll('.day');
         rows.forEach(row => {
             const startInput = row.querySelector('.start-time');
             const endInput = row.querySelector('.end-time');
             const d = startInput.getAttribute('data-day');
+            const dayOfWeek = parseInt(startInput.getAttribute('data-weekday'));
 
             const sVal = startInput.value;
             const eVal = endInput.value;
@@ -521,9 +521,21 @@
             const hours = computeHours(sVal, eVal);
             const displayEl = document.getElementById(`calc_text_${d}`);
             
+            // Динамически обновляем подпись ставки для воскресенья
+            if (dayOfWeek === 0) {
+                const badgeEl = document.getElementById(`rate_badge_${d}`);
+                if (badgeEl) {
+                    const activeRate = customSundayRate > 0 ? customSundayRate : baseRate;
+                    badgeEl.textContent = `${activeRate} Zl/ч`;
+                }
+            }
+
             if(hours > 0) {
                 displayEl.textContent = `${hours.toFixed(2)} ч`;
                 grandTotalHours += hours;
+
+                const currentDayRate = (dayOfWeek === 0 && customSundayRate > 0) ? customSundayRate : baseRate;
+                grandTotalEarnings += hours * currentDayRate;
             } else {
                 displayEl.textContent = '0 ч';
             }
@@ -532,8 +544,7 @@
         localStorage.setItem(storageKey, JSON.stringify(monthDataToSave));
 
         totalHoursEl.textContent = `${grandTotalHours.toFixed(2)} ч`;
-        const rate = parseFloat(rateInput.value) || 0;
-        totalEarningsEl.textContent = `${(grandTotalHours * rate).toFixed(2)} Zl`;
+        totalEarningsEl.textContent = `${grandTotalEarnings.toFixed(2)} Zl`;
     }
 
     function setupListeners() {
@@ -544,8 +555,14 @@
 
     monthSelect.addEventListener('change', renderCalendar);
     yearSelect.addEventListener('change', renderCalendar);
+    
     rateInput.addEventListener('input', () => {
         localStorage.setItem('savedRate', rateInput.value);
+        calculateTotalAndSave();
+    });
+
+    sundayRateInput.addEventListener('input', () => {
+        localStorage.setItem('savedSundayRate', sundayRateInput.value);
         calculateTotalAndSave();
     });
 
@@ -592,83 +609,14 @@
         if ((currentY - startY) > 70) {
             ptr.style.top = '20px';
             ptr.classList.add('ptr-loading');
-            setTimeout(() => { window.location.reload(); }, 800);
+            if ('caches' in window) {
+                caches.keys().then(names => { for (let n of names) caches.delete(n); });
+            }
+            setTimeout(() => { window.location.reload(); }, 600);
         } else {
             ptr.style.top = '-50px';
         }
     });
   </script>
-  <!-- Сам элемент крутилки (оставляем один раз) -->
-<div id="ptr-indicator">
-    <svg viewBox="0 0 24 24">
-        <path d="M17.65 6.35A7.958 7.958 0 0 0 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
-    </svg>
-</div>
-
-<script>
-    // ИСПРАВЛЕНО: Объявляем переменные свайпа строго ОДИН раз за весь файл
-    const myPtr = document.getElementById('ptr-indicator');
-    let pStartY = 0;
-    let pCurrentY = 0;
-    let pIsPulling = false;
-
-    // Срабатывает, когда палец касается экрана
-    window.addEventListener('touchstart', (e) => {
-        if (window.scrollY === 0 && e.touches.length > 0) {
-            pStartY = e.touches[0].pageY;
-            pCurrentY = pStartY;
-            pIsPulling = true;
-        }
-    }, { passive: true });
-
-    // Срабатывает при движении пальца
-    window.addEventListener('touchmove', (e) => {
-        if (!pIsPulling || e.touches.length === 0) return;
-        
-        pCurrentY = e.touches[0].pageY;
-        const pullDistance = pCurrentY - pStartY;
-
-        // Если тянем вниз
-        if (pullDistance > 0 && pullDistance < 150) {
-            myPtr.style.top = `${-50 + pullDistance * 0.6}px`;
-            myPtr.querySelector('svg').style.transform = `rotate(${pullDistance * 2}deg)`;
-        }
-    }, { passive: true });
-
-    // Срабатывает, когда палец отпускают
-    window.addEventListener('touchend', () => {
-        if (!pIsPulling) return;
-        pIsPulling = false;
-
-        const pullDistance = pCurrentY - pStartY;
-
-        if (pullDistance > 70) {
-            myPtr.style.top = '20px'; 
-            myPtr.classList.add('ptr-loading'); 
-            
-            // Очищаем кэш PWA на iPhone перед жестким обновлением
-            if ('caches' in window) {
-                caches.keys().then(names => { for (let n of names) caches.delete(n); });
-            }
-
-            setTimeout(() => {
-                window.location.reload();
-            }, 600);
-        } else {
-            myPtr.style.top = '-50px';
-        }
-        
-        pStartY = 0;
-        pCurrentY = 0;
-    });
-
-    window.addEventListener('touchcancel', () => {
-        pIsPulling = false;
-        myPtr.style.top = '-50px';
-        pStartY = 0;
-        pCurrentY = 0;
-    });
-</script>
-
 </body>
 </html>
